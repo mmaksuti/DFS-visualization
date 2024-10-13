@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Graph Visualization</title>
+    <style type="text/css">
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: monospace;
+        }
+
+        #graph {
+            width: 700px;
+            height: 700px;
+            position: absolute;
+            top: 50%;
+            left: 50px;
+            -ms-transform: translateY(-50%);
+            transform: translateY(-50%);
+            border: 1px solid black;
+        }
+
+        #controls {
+            position: absolute;
+            top: 50%;
+            transform: translate(900px, -50%);
+        }
+    </style>
+    <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    <script type="text/javascript" src="Graph.js"></script>
+    <script type="text/javascript" src="GraphVisualizer.js"></script>
+    <script type="text/javascript">
+        document.addEventListener('DOMContentLoaded', function() {
+            // Create a network container
+            let container = document.getElementById('graph');
+
+            // create graph and vizualizer objects
+            graph = new Graph();
+            visualizer = new GraphVisualizer(graph, container);
+
+            // button click handlers
+            let addEdgeButton = document.getElementById('addEdgeButton');
+            addEdgeButton.addEventListener('click', function() {
+                let fromVertex = document.getElementById('fromVertex').value;
+                let toVertex = document.getElementById('toVertex').value;
+                graph.addEdge(fromVertex, toVertex);
+            });
+
+            let removeEdgeButton = document.getElementById('removeEdgeButton');
+            removeEdgeButton.addEventListener('click', function() {
+                let edgeId = visualizer.network.getSelection().edges[0];
+                let edge = visualizer.edges.get(edgeId);
+                if (edge) {
+                    let fromVertex = edge.from;
+                    let toVertex = edge.to;
+                    graph.removeEdge(fromVertex, toVertex);
+                }
+            });
+
+            let removeVertexButton = document.getElementById('removeVertexButton');
+            removeVertexButton.addEventListener('click', function() {
+                let vertex = visualizer.network.getSelection().nodes[0];
+                if (vertex) {
+                    graph.removeVertex(vertex);
+                }
+            });
+
+            let addVertexButton = document.getElementById('addVertexButton');
+            addVertexButton.addEventListener('click', function() {
+                let newVertex = document.getElementById('newVertex').value;
+                graph.addVertex(newVertex);
+            });
+
+            let depthFirstSearchButton = document.getElementById('depthFirstSearchButton');
+            depthFirstSearchButton.addEventListener('click', function() {
+                let searchVertex = document.getElementById('searchVertex').value;
+                let vertex = visualizer.network.getSelection().nodes[0];
+                let outputText = document.getElementById('output');
+                outputText.innerText = '';
+
+                visualizer.network.selectNodes([]);
+                if (vertex) {
+                    visualizer.depthFirstSearch(vertex, searchVertex, outputText);
+                }
+            });
+
+            let resetButton = document.getElementById('resetButton');
+            resetButton.addEventListener('click', function() {
+                visualizer.network.selectNodes([]);
+                visualizer.resetColors();
+            });
+
+            let clearButton = document.getElementById('clearButton');
+            clearButton.addEventListener('click', function() {
+                // reset color of all nodes
+                for (let vertex of graph.getVertices()) {
+                    graph.removeVertex(vertex);
+                }
+
+                if (visualizer.outputText) {
+                    visualizer.outputText.innerText = '';
+                }
+            });
+
+            // starting example
+            graph.addEdge('A', 'B');
+            graph.addEdge('A', 'C');
+            graph.addEdge('A', 'D');
+            graph.addEdge('B', 'E');
+            graph.addEdge('B', 'F');
+            graph.addEdge('B', 'E');
+            graph.addEdge('C', 'G');
+            graph.addEdge('D', 'H');
+            graph.addEdge('D', 'I');
+            graph.addEdge('D', 'A');
+            graph.addEdge('E', 'J');
+            graph.addEdge('K', 'L');
+            graph.addEdge('L', 'M');
+        });
+    </script>
+</head>
+<body>
+<div id="graph"></div>
+
+<div id="controls">
+    <h2>Add Edge</h2>
+    <label for="fromVertex">From:</label>
+    <input type="text" id="fromVertex" required>
+    <label for="toVertex">To:</label>
+    <input type="text" id="toVertex" required>
+    <button id="addEdgeButton">Add Edge</button>
+
+    <h2>Remove Edge</h2>
+    <p>Select an edge and click the button to remove it.</p>
+    <button id="removeEdgeButton">Remove Edge</button>
+
+    <h2>Remove Vertex</h2>
+    <p>Select a vertex and click the button to remove it.</p>
+    <button id="removeVertexButton">Remove Vertex</button>
+
+    <h2>Add Vertex</h2>
+    <label for="newVertex">New Vertex:</label>
+    <input type="text" id="newVertex" required>
+    <button id="addVertexButton">Add Vertex</button>
+
+    <h2>Depth First Search</h2>
+    <p>Select a vertex and click the button to traverse starting from that vertex.<br>
+       Enter an input to search for a particular vertex</p>
+    <label for="searchVertex">Search Vertex:</label>
+    <input type="text" id="searchVertex">
+    <button id="depthFirstSearchButton">Traverse</button>
+    <button id="resetButton">Reset</button><br><br>
+    Traversal result: <label id="output"></label>
+
+    <h2>Clear graph</h2>
+    <button id="clearButton">Clear</button>
+</div>
+</body>
+</html>
